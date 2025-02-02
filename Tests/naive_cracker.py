@@ -6,16 +6,17 @@ import string
 
 
 
-_password = "floccinaucinihilipilification"
-#_password = "Hippopotomonstrosesquippedaliophobia"
+#_password = "floccinaucinihilipilification"
+_password = "hippopotomonstrosesquippedaliophobia"
 
 pass_length = len(_password)
-valid_charset = string.ascii_lowercase
+valid_charset = string.ascii_lowercase + string.ascii_uppercase
 pop_size = 2000
-random.seed(1)
-mutation_rate = 0.005
-lambda_proportion = 0.8
+random.seed(10)
+mutation_rate = 0.01
+lambda_proportion = 0.5
 generations = 10000
+n_times = 1
 
 
 def naive_checker(attempt):
@@ -37,10 +38,10 @@ def validation_time(attempt, n = 1, f = naive_checker):
     times = []
     for _ in range(n):
         start_time = timeit.default_timer()
-        f(attempt)
+        cracked = f(attempt)
         end_time = timeit.default_timer()
         times.append(end_time - start_time)
-    return median(times)
+    return median(times) if not cracked else -1
 
 
 
@@ -59,6 +60,20 @@ def fitness(population, f = naive_checker):
         ind_time = validation_time(individual, n_repeats, f)
         timings.append(ind_time)
     return timings
+
+def crossover(parent1, parent2):
+    child = []
+    run_same = True
+
+    for i in range(pass_length):
+        if run_same and parent1[i] == parent2[i]:
+            child.append(parent1[i])
+        else:
+            run_same = False
+            child.append(random.choice([parent1[i], parent2[i]]))
+    
+    return "".join(child)
+
 
 #constant mutate
 def mutate(individual):
@@ -90,6 +105,20 @@ def top_prop_selection(population, fitness):
     
     return selected
 
+def next_generation(selected):
+    next_generation = []
+    
+    while len(next_generation) < pop_size:
+
+        parent1, parent2 = random.sample(selected, 2)
+
+        child = crossover(parent1, parent2)
+        child = mutate(child)
+        
+        next_generation.append(child)
+    
+    return next_generation
+
 def next_generation_duplicate(selected):
     next_generation = []
     idx = 0
@@ -110,7 +139,7 @@ def genetic_algorithm(initial_population, generations):
     fitness_scores = fitness(population)
     print(population)
     print(fitness_scores)
-
+    cracked = False
 
 
     for gen in range(generations):
@@ -127,7 +156,11 @@ def genetic_algorithm(initial_population, generations):
 
         # Recalculate fitness for the new generation
         fitness_scores = fitness(population)
-        
+        if -1 in fitness_scores:
+            cracked = True
+            crackedPassword = population[fitness_scores.index(-1)]
+            crackedGens = gen
+            break
         # # Print best solution so far
         # best_fitness = max(fitness_scores)
         # best_individual = population[fitness_scores.index(best_fitness)]
@@ -146,7 +179,10 @@ def genetic_algorithm(initial_population, generations):
         best_fitness_storage.append(best_fitness)
         avg_fitness_storage.append(avg_fitness)
  
-    
+    if cracked:
+        print("Password Cracked:")
+        print(crackedPassword)
+        print("Attempts: " + str(pop_size*crackedGens*n_times))
     return population, fitness_scores
 
 
