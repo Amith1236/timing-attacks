@@ -51,6 +51,10 @@ def validation_time(attempt, n = 1, f = naive_checker):
 
 # initial population
 
+def generate_population(size, passLength, validChar):
+    init_population = [''.join(random.choice(valid_charset) for _ in range(pass_length)) for _ in range (pop_size)]
+    return init_population
+
 
 init_population = [''.join(random.choice(valid_charset) for _ in range(pass_length)) for _ in range (pop_size)]
 
@@ -189,4 +193,5 @@ def genetic_algorithm(initial_population, generations):
 
 
 
-#final_population, final_fitness = genetic_algorithm(init_population, generations)
+
+final_population, final_fitness = genetic_algorithm(init_population, generations)

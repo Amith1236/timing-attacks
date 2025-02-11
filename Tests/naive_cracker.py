@@ -10,7 +10,7 @@ import string
 _password = "hippopotomonstrosesquippedaliophobia"
 
 pass_length = len(_password)
-valid_charset = string.ascii_lowercase + string.ascii_uppercase
+valid_charset = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
 pop_size = 2000
 random.seed(10)
 mutation_rate = 0.01
