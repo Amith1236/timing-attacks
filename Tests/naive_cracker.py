@@ -3,21 +3,27 @@ import numpy as np
 from statistics import median
 import random
 import string
+import matplotlib.pyplot as plt
 
 
 
 #_password = "floccinaucinihilipilification"
-_password = "hippopotomonstrosesquippedaliophobia"
+#_password = "hippopotomonstrosesquippedaliophobia"
+_password = "passwordpassword"
 
 pass_length = len(_password)
-valid_charset = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
+valid_charset = string.ascii_lowercase
 pop_size = 2000
-random.seed(10)
-mutation_rate = 0.01
-lambda_proportion = 0.5
+#random.seed(10)
+mutation_rate = 0.001
+lambda_proportion = 0.8
 generations = 10000
 n_times = 1
 
+def caesar_shift(text, shift):
+    """Applies a simple Caesar cipher shift to a string."""
+    return ''.join(chr((ord(c) - 32 + shift) % 95 + 32) for c in text)
+c_pass = caesar_shift(_password, 10)
 
 def naive_checker(attempt):
     n = len(_password)
@@ -25,11 +31,17 @@ def naive_checker(attempt):
     if len(attempt) != n:
         success = False
     else:
-        for idx in range(n):
+        idx_array =[_ for _ in range(n)]
+        random.shuffle(idx_array)
+        for idx in idx_array:
             if attempt[idx] != _password[idx]:
                 success = False
                 break
+        # for idx in range(n):
+        #     if attempt[idx] != c_pass[idx]:
+        #         break
     return success
+
 
 
 
@@ -74,6 +86,13 @@ def crossover(parent1, parent2):
     
     return "".join(child)
 
+def crossover2(parent1, parent2):
+
+    point = random.randint(0, pass_length  -1)
+    child = parent1[:point] + parent2[point:]
+    
+    return child
+
 
 #constant mutate
 def mutate(individual):
@@ -88,6 +107,10 @@ def mutate(individual):
             individual[i] = new_char
     
     return ''.join(individual)
+
+def estimateP(currentGenerations, validPasswords):
+    p_est = ((lambda_proportion)**(currentGenerations))*(validPasswords)
+    return p_est
 
 
 #Selection of best individuals
@@ -112,7 +135,7 @@ def next_generation(selected):
 
         parent1, parent2 = random.sample(selected, 2)
 
-        child = crossover(parent1, parent2)
+        child = crossover2(parent1, parent2)
         child = mutate(child)
         
         next_generation.append(child)
@@ -135,6 +158,7 @@ best_fitness_storage = []
 avg_fitness_storage = []
 
 def genetic_algorithm(initial_population, generations):
+    cracked_p = 0
     population = initial_population
     fitness_scores = fitness(population)
     print(population)
@@ -180,11 +204,34 @@ def genetic_algorithm(initial_population, generations):
         avg_fitness_storage.append(avg_fitness)
  
     if cracked:
+        cracked_p = estimateP(crackedGens, fitness_scores.count(-1))
         print("Password Cracked:")
         print(crackedPassword)
         print("Attempts: " + str(pop_size*crackedGens*n_times))
-    return population, fitness_scores
+        print("Estimated P: " + str(cracked_p))
+    return population, fitness_scores, cracked_p, crackedGens
 
 
+p_s = []
+gen_s =[]
+for i in range(5):
+    
+    final_population, final_fitness, cracked_p, cracked_g = genetic_algorithm(init_population, generations)
+    p_s.append(cracked_p)
+    gen_s.append(cracked_g)
 
-final_population, final_fitness = genetic_algorithm(init_population, generations)
+print(gen_s)
+print(p_s)
+
+# Plot Probability of Cracking vs Generations
+plt.figure(figsize=(8, 5))
+plt.scatter(gen_s, p_s, label="Crack Probability", color="red", alpha=0.7)
+plt.plot(gen_s, p_s, linestyle='--', color='blue', alpha=0.5)
+
+plt.xlabel("Generations")
+plt.ylabel("Crack Probability")
+plt.title("Crack Probability vs. Generations")
+plt.legend()
+plt.grid(True)
+
+plt.show()
