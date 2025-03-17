@@ -15,7 +15,7 @@ pass_length = len(_password)
 valid_charset = string.ascii_lowercase
 pop_size = 2000
 #random.seed(10)
-mutation_rate = 0.001
+mutation_rate = 0.01
 lambda_proportion = 0.8
 generations = 10000
 n_times = 1
@@ -31,15 +31,16 @@ def naive_checker(attempt):
     if len(attempt) != n:
         success = False
     else:
-        idx_array =[_ for _ in range(n)]
-        random.shuffle(idx_array)
-        for idx in idx_array:
+        # idx_array =[_ for _ in range(n)]
+        # random.shuffle(idx_array)
+        # for idx in idx_array:
+        #     if attempt[idx] != _password[idx]:
+        #         success = False
+        #         break
+        for idx in range(n):
             if attempt[idx] != _password[idx]:
                 success = False
                 break
-        # for idx in range(n):
-        #     if attempt[idx] != c_pass[idx]:
-        #         break
     return success
 
 
@@ -214,7 +215,7 @@ def genetic_algorithm(initial_population, generations):
 
 p_s = []
 gen_s =[]
-for i in range(5):
+for i in range(1):
     
     final_population, final_fitness, cracked_p, cracked_g = genetic_algorithm(init_population, generations)
     p_s.append(cracked_p)
@@ -224,14 +225,14 @@ print(gen_s)
 print(p_s)
 
 # Plot Probability of Cracking vs Generations
-plt.figure(figsize=(8, 5))
-plt.scatter(gen_s, p_s, label="Crack Probability", color="red", alpha=0.7)
-plt.plot(gen_s, p_s, linestyle='--', color='blue', alpha=0.5)
+# plt.figure(figsize=(8, 5))
+# plt.scatter(gen_s, p_s, label="Crack Probability", color="red", alpha=0.7)
+# plt.plot(gen_s, p_s, linestyle='--', color='blue', alpha=0.5)
 
-plt.xlabel("Generations")
-plt.ylabel("Crack Probability")
-plt.title("Crack Probability vs. Generations")
-plt.legend()
-plt.grid(True)
+# plt.xlabel("Generations")
+# plt.ylabel("Crack Probability")
+# plt.title("Crack Probability vs. Generations")
+# plt.legend()
+# plt.grid(True)
 
-plt.show()
+# plt.show()
